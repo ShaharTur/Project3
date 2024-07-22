@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Details Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: url('https://images.hdqwalls.com/download/lightning-floor-abstract-5k-bx-2560x1440.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+            background-color: rgba(255, 255, 255, 0.3); /* White background with transparency */
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1;
+            position: relative;
+        }
+        .form-group label {
+            font-weight: bold;
+            text-align: right; /* Align labels to the right */
+            float: right; /* Float labels to the right */
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffffff; /* Ensure header text is readable */
+        }
+        .prediction-result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body dir="rtl">
+    <div class="container">
+        <div class="header">
+            <h1>🚗 חיזוי מחיר רכב 🚗</h1>
+            <h2>הזן את נתוני הרכב:</h2>
+        </div>
+        <form id="vehicle-form" action="{{ url_for('predict') }}" method="post" onsubmit="return validateForm()">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="manufactor">יצרן:</label>
+                    <input type="text" class="form-control" id="manufactor" name="manufactor" dir="rtl">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="year">שנה:</label>
+                    <input type="text" class="form-control" id="year" name="year" dir="rtl">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="model">דגם:</label>
+                    <input type="text" class="form-control" id="model" name="model" dir="rtl">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="hand">יד:</label>
+                    <input type="text" class="form-control" id="hand" name="hand" dir="rtl">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="gear">גיר:</label>
+                    <input type="text" class="form-control" id="gear" name="gear" dir="rtl">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="capacity_engine">נפח מנוע:</label>
+                    <input type="text" class="form-control" id="capacity_engine" name="capacity_engine" dir="rtl">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="engine_type">סוג מנוע:</label>
+                    <input type="text" class="form-control" id="engine_type" name="engine_type" dir="rtl">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="prev_ownership">בעלות קודמת:</label>
+                    <input type="text" class="form-control" id="prev_ownership" name="prev_ownership" dir="rtl">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="curr_ownership">בעלות נוכחית:</label>
+                    <input type="text" class="form-control" id="curr_ownership" name="curr_ownership" dir="rtl">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="city">עיר:</label>
+                    <input type="text" class="form-control" id="city" name="city" dir="rtl">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="color">צבע:</label>
+                    <input type="text" class="form-control" id="color" name="color" dir="rtl">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="km">ק"מ:</label>
+                    <input type="text" class="form-control" id="km" name="km" dir="rtl">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">לחיזוי המחיר</button>
+        </form>
+        <div id="error-message" class="error-message"></div>
+        {% if prediction_text %}
+        <div class="prediction-result">
+            {{ prediction_text }}
+        </div>
+        {% endif %}
+    </div>
+    <script>
+        function validateForm() {
+            var isValid = true;
+            var errorMessage = "נא למלא את כל השדות הבאים: ";
+            var requiredFields = {
+                "manufactor": "יצרן",
+                "year": "שנה",
+                "model": "דגם",
+                "hand": "יד",
+                "gear": "גיר",
+                "capacity_engine": "נפח מנוע",
+                "engine_type": "סוג מנוע",
+                "prev_ownership": "בעלות קודמת",
+                "curr_ownership": "בעלות נוכחית",
+                "city": "עיר",
+                "color": "צבע",
+                "km": "ק\"מ"
+            };
+            
+            for (var field in requiredFields) {
+                var input = document.getElementById(field);
+                if (input.value.trim() === "") {
+                    errorMessage += requiredFields[field] + ", ";
+                    input.style.borderColor = "red";
+                    isValid = false;
+                } else {
+                    input.style.borderColor = "";
+                }
+            }
+
+            if (!isValid) {
+                document.getElementById("error-message").innerText = errorMessage.slice(0, -2) + ".";
+            }
+
+            return isValid;
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
