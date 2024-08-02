@@ -126,30 +126,60 @@
     <script>
         function validateForm() {
             var isValid = true;
-            var errorMessage = "נא למלא את כל השדות הבאים: ";
+            var errorMessage = "נא למלא את כל השדות הבאים ולוודא שהסוג הנכון הוזן: ";
             var requiredFields = {
-                "manufactor": "יצרן",
-                "year": "שנה",
-                "model": "דגם",
-                "hand": "יד",
-                "gear": "גיר",
-                "capacity_engine": "נפח מנוע",
-                "engine_type": "סוג מנוע",
-                "prev_ownership": "בעלות קודמת",
-                "curr_ownership": "בעלות נוכחית",
-                "city": "עיר",
-                "color": "צבע",
-                "km": "ק\"מ"
+                "manufactor": {name: "יצרן", type: "string"},
+                "year": {name: "שנה", type: "int"},
+                "model": {name: "דגם", type: "string"},
+                "hand": {name: "יד", type: "int"},
+                "gear": {name: "גיר", type: "categorical", values: ["אוטומטית", "ידנית", "טיפטרוניק", "רובוטית"]},
+                "capacity_engine": {name: "נפח מנוע", type: "int"},
+                "engine_type": {name: "סוג מנוע", type: "categorical", values: ["בנזין", "דיזל", "גז", "היברידי", "טורבו דיזל", "חשמלי"]},
+                "prev_ownership": {name: "בעלות קודמת", type: "categorical", values: ["פרטית", "ליסינג", "מונית", "השכרה", "חברה"]},
+                "curr_ownership": {name: "בעלות נוכחית", type: "categorical", values: ["פרטית", "ליסינג", "מונית", "השכרה", "חברה"]},
+                "city": {name: "עיר", type: "string"},
+                "color": {name: "צבע", type: "string"},
+                "km": {name: "ק\"מ", type: "int"}
             };
             
+            function isNumeric(value) {
+                return /^-?\d+$/.test(value);
+            }
+
             for (var field in requiredFields) {
                 var input = document.getElementById(field);
-                if (input.value.trim() === "") {
-                    errorMessage += requiredFields[field] + ", ";
+                var value = input.value.trim();
+
+                if (value === "") {
+                    errorMessage += requiredFields[field].name + " (חסר ערך), ";
                     input.style.borderColor = "red";
                     isValid = false;
                 } else {
-                    input.style.borderColor = "";
+                    if (requiredFields[field].type === "int") {
+                        if (!isNumeric(value)) {
+                            errorMessage += requiredFields[field].name + " (מספר שלם נדרש), ";
+                            input.style.borderColor = "red";
+                            isValid = false;
+                        } else {
+                            input.style.borderColor = "";
+                        }
+                    } else if (requiredFields[field].type === "categorical") {
+                        if (!requiredFields[field].values.includes(value)) {
+                            errorMessage += requiredFields[field].name + " (ערכים מותרים: " + requiredFields[field].values.join(", ") + "), ";
+                            input.style.borderColor = "red";
+                            isValid = false;
+                        } else {
+                            input.style.borderColor = "";
+                        }
+                    } else if (requiredFields[field].type === "string") {
+                        if (isNumeric(value)) {
+                            errorMessage += requiredFields[field].name + " (מחרוזת נדרשת), ";
+                            input.style.borderColor = "red";
+                            isValid = false;
+                        } else {
+                            input.style.borderColor = "";
+                        }
+                    }
                 }
             }
 
