@@ -1,0 +1,1 @@
+##This project involves integrating machine learning into a web application that predicts car prices based on user provided vehicle descriptions. The machine learning model, developed in Project 2, has been deployed within a custom built website for real time predictions.
